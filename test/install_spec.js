@@ -45,6 +45,24 @@ describe('Extension Installer', () => {
           })
           .catch(err => done(err));
       });
+
+      it('should upgraded the extension if installed version is different from chromeStore version', (done) => {
+        const extensionName = 'React Developer Tools';
+        const oldVersion = '0.14.0';
+        BrowserWindow.removeDevToolsExtension(extensionName);
+        BrowserWindow.addDevToolsExtension(path.join(__dirname, 'fixtures/simple_extension'))
+          .should.be.equal(extensionName);
+        BrowserWindow.getDevToolsExtensions()[extensionName].version
+          .should.be.equal(oldVersion);
+
+        installExtension(REACT_DEVELOPER_TOOLS)
+          .then(() => {
+            BrowserWindow.getDevToolsExtensions()[extensionName].version
+              .should.not.be.equal(oldVersion);
+            done();
+          })
+          .catch(err => done(err));
+      });
     });
   });
 
