@@ -32,7 +32,10 @@ export default async (extensionReference, forceDownload = false) => {
   const extensionInstalled = extensionName &&
     BrowserWindow.getDevToolsExtensions &&
     BrowserWindow.getDevToolsExtensions()[extensionName];
-  const extensionUpdated = await isUpdated(extensionName);
+  let extensionUpdated = true;
+  if (extensionInstalled) {
+    extensionUpdated = await isUpdated(chromeStoreID, extensionInstalled.version);
+  }
   if (!forceDownload && extensionInstalled && extensionUpdated) {
     return Promise.resolve(IDMap[chromeStoreID]);
   }
