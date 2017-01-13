@@ -4,7 +4,7 @@ import path from 'path';
 import semver from 'semver';
 
 import downloadChromeExtension from './downloadChromeExtension';
-import { getPath } from './utils';
+import { getPath, isUpdated } from './utils';
 
 const { BrowserWindow } = remote || electron;
 
@@ -14,7 +14,7 @@ if (fs.existsSync(IDMapPath)) {
   IDMap = JSON.parse(fs.readFileSync(IDMapPath, 'utf8'));
 }
 
-export default (extensionReference, forceDownload = false) => {
+export default async (extensionReference, forceDownload = false) => {
   let chromeStoreID;
   if (typeof extensionReference === 'object' && extensionReference.id) {
     chromeStoreID = extensionReference.id;
@@ -32,7 +32,8 @@ export default (extensionReference, forceDownload = false) => {
   const extensionInstalled = extensionName &&
     BrowserWindow.getDevToolsExtensions &&
     BrowserWindow.getDevToolsExtensions()[extensionName];
-  if (!forceDownload && extensionInstalled) {
+  const extensionUpdated = await isUpdated(extensionName);
+  if (!forceDownload && extensionInstalled && extensionUpdated) {
     return Promise.resolve(IDMap[chromeStoreID]);
   }
   return downloadChromeExtension(chromeStoreID, forceDownload)
